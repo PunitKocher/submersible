@@ -24,6 +24,10 @@ public class Probe {
     }
 
     public void execute(String command) {
+        if (!command.matches("[FBLR]*")) {
+            throw new IllegalArgumentException("Invalid command input. Only F, B, L, R are allowed.");
+        }
+
         for (char c : command.toCharArray()) {
             switch (c) {
                 case 'F' -> moveForward();

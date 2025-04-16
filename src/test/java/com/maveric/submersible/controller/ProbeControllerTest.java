@@ -5,7 +5,6 @@ import com.maveric.submersible.dto.CommandRequest;
 import com.maveric.submersible.model.Direction;
 import com.maveric.submersible.model.Position;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -140,27 +139,58 @@ class ProbeControllerTest {
     }
 
     @Test
-void shouldReturnBadRequestForNullStartPosition() throws Exception {
-    String json = """
-        {
-          "start": null,
-          "direction": "NORTH",
-          "gridWidth": 5,
-          "gridHeight": 5,
-          "commands": "F"
-        }
-        """;
+    void shouldReturnBadRequestForNullStartPosition() throws Exception {
+        String json = """
+            {
+            "start": null,
+            "direction": "NORTH",
+            "gridWidth": 5,
+            "gridHeight": 5,
+            "commands": "F"
+            }
+            """;
 
-    mockMvc.perform(post("/api/probe/execute")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(json))
-            .andExpect(status().isBadRequest());
-}
+        mockMvc.perform(post("/api/probe/execute")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json))
+                .andExpect(status().isBadRequest());
+    }
 
-    
+    @Test
+    void shouldReturnBadRequestForInvalidCommandCharacters() throws Exception {
+        String jsonRequest = """
+            {
+                "start": {"x": 0, "y": 0},
+                "direction": "NORTH",
+                "gridWidth": 5,
+                "gridHeight": 5,
+                "commands": "FXBLR"
+            }
+            """;
 
+        mockMvc.perform(post("/api/probe/execute")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonRequest))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Invalid command input. Only F, B, L, R are allowed."));
+    }
 
+    @Test
+    void shouldReturnBadRequestForInvalidDirection() throws Exception {
+        String json = """
+            {
+                "start": {"x": 0, "y": 0},
+                "direction": "UPWARD",
+                "gridWidth": 5,
+                "gridHeight": 5,
+                "commands": "F"
+            }
+            """;
 
-
+        mockMvc.perform(post("/api/probe/execute")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json))
+                .andExpect(status().isBadRequest());
+    }
 
 }
