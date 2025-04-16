@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.maveric.submersible.dto.CommandRequest;
 import com.maveric.submersible.model.Direction;
 import com.maveric.submersible.model.Position;
+
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -136,6 +138,26 @@ class ProbeControllerTest {
                 .andExpect(jsonPath("$.visited[1].y").value(1))
                 .andExpect(jsonPath("$.visited[2].y").value(2));
     }
+
+    @Test
+void shouldReturnBadRequestForNullStartPosition() throws Exception {
+    String json = """
+        {
+          "start": null,
+          "direction": "NORTH",
+          "gridWidth": 5,
+          "gridHeight": 5,
+          "commands": "F"
+        }
+        """;
+
+    mockMvc.perform(post("/api/probe/execute")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(json))
+            .andExpect(status().isBadRequest());
+}
+
+    
 
 
 
