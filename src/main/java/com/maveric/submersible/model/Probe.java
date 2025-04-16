@@ -49,8 +49,8 @@ public class Probe {
     }
 
     private void moveIfValid(Position newPosition) {
-        boolean inBounds = newPosition.getX() >= 0 && newPosition.getX() < maxX
-                        && newPosition.getY() >= 0 && newPosition.getY() < maxY;
+        boolean inBounds = newPosition.x() >= 0 && newPosition.x() < maxX
+                        && newPosition.y() >= 0 && newPosition.y() < maxY;
         if (inBounds && !obstacles.contains(newPosition)) {
             position = newPosition;
             visited.add(position);

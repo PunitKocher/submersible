@@ -27,37 +27,38 @@ class ProbeControllerTest {
 
     @Test
     void shouldReturnFinalProbeState() throws Exception {
-        CommandRequest request = new CommandRequest();
-        request.setStart(new Position(1, 1));
-        request.setDirection(Direction.NORTH);
-        request.setGridWidth(5);
-        request.setGridHeight(5);
-        request.setObstacles(Set.of(new Position(3, 3)));
-        request.setCommands("FFRFF");
+        CommandRequest request = new CommandRequest(
+                new Position(1, 1),
+                Direction.NORTH,
+                5,
+                5,
+                Set.of(new Position(3, 3)),
+                "FFRFF"
+        );
 
         mockMvc.perform(post("/api/probe/execute")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.current.x").value(2))
                 .andExpect(jsonPath("$.current.y").value(3))
                 .andExpect(jsonPath("$.direction").value("EAST"));
-
     }
 
     @Test
     void shouldMoveCorrectlyWithoutObstacles() throws Exception {
-        CommandRequest request = new CommandRequest();
-        request.setStart(new Position(0, 0));
-        request.setDirection(Direction.EAST);
-        request.setGridWidth(5);
-        request.setGridHeight(5);
-        request.setObstacles(Set.of());
-        request.setCommands("FFRFF");
+        CommandRequest request = new CommandRequest(
+                new Position(0, 0),
+                Direction.EAST,
+                5,
+                5,
+                Set.of(),
+                "FFRFF"
+        );
 
         mockMvc.perform(post("/api/probe/execute")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.current.x").value(2))
                 .andExpect(jsonPath("$.current.y").value(0))
@@ -66,52 +67,55 @@ class ProbeControllerTest {
 
     @Test
     void shouldStopBeforeObstacle() throws Exception {
-        CommandRequest request = new CommandRequest();
-        request.setStart(new Position(0, 0));
-        request.setDirection(Direction.EAST);
-        request.setGridWidth(5);
-        request.setGridHeight(5);
-        request.setObstacles(Set.of(new Position(2, 0)));
-        request.setCommands("FFF");
+        CommandRequest request = new CommandRequest(
+                new Position(0, 0),
+                Direction.EAST,
+                5,
+                5,
+                Set.of(new Position(2, 0)),
+                "FFF"
+        );
 
         mockMvc.perform(post("/api/probe/execute")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.current.x").value(1))  // Blocked at x=2
+                .andExpect(jsonPath("$.current.x").value(1))
                 .andExpect(jsonPath("$.current.y").value(0));
     }
 
     @Test
     void shouldNotMoveOutOfGrid() throws Exception {
-        CommandRequest request = new CommandRequest();
-        request.setStart(new Position(0, 0));
-        request.setDirection(Direction.WEST);
-        request.setGridWidth(3);
-        request.setGridHeight(3);
-        request.setObstacles(Set.of());
-        request.setCommands("F"); // Would go to x = -1
+        CommandRequest request = new CommandRequest(
+                new Position(0, 0),
+                Direction.WEST,
+                3,
+                3,
+                Set.of(),
+                "F"
+        );
 
         mockMvc.perform(post("/api/probe/execute")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.current.x").value(0)); // stays in bounds
+                .andExpect(jsonPath("$.current.x").value(0));
     }
 
     @Test
     void shouldOnlyRotateAndNotMove() throws Exception {
-        CommandRequest request = new CommandRequest();
-        request.setStart(new Position(2, 2));
-        request.setDirection(Direction.NORTH);
-        request.setGridWidth(5);
-        request.setGridHeight(5);
-        request.setObstacles(Set.of());
-        request.setCommands("RRLL");
+        CommandRequest request = new CommandRequest(
+                new Position(2, 2),
+                Direction.NORTH,
+                5,
+                5,
+                Set.of(),
+                "RRLL"
+        );
 
         mockMvc.perform(post("/api/probe/execute")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.current.x").value(2))
                 .andExpect(jsonPath("$.current.y").value(2))
@@ -120,17 +124,18 @@ class ProbeControllerTest {
 
     @Test
     void shouldTrackVisitedPositions() throws Exception {
-        CommandRequest request = new CommandRequest();
-        request.setStart(new Position(0, 0));
-        request.setDirection(Direction.NORTH);
-        request.setGridWidth(3);
-        request.setGridHeight(3);
-        request.setObstacles(Set.of());
-        request.setCommands("FF");
+        CommandRequest request = new CommandRequest(
+                new Position(0, 0),
+                Direction.NORTH,
+                3,
+                3,
+                Set.of(),
+                "FF"
+        );
 
         mockMvc.perform(post("/api/probe/execute")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.visited.length()").value(3))
                 .andExpect(jsonPath("$.visited[0].x").value(0))
@@ -142,17 +147,17 @@ class ProbeControllerTest {
     void shouldReturnBadRequestForNullStartPosition() throws Exception {
         String json = """
             {
-            "start": null,
-            "direction": "NORTH",
-            "gridWidth": 5,
-            "gridHeight": 5,
-            "commands": "F"
+              "start": null,
+              "direction": "NORTH",
+              "gridWidth": 5,
+              "gridHeight": 5,
+              "commands": "F"
             }
             """;
 
         mockMvc.perform(post("/api/probe/execute")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(json))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
                 .andExpect(status().isBadRequest());
     }
 
@@ -160,17 +165,17 @@ class ProbeControllerTest {
     void shouldReturnBadRequestForInvalidCommandCharacters() throws Exception {
         String jsonRequest = """
             {
-                "start": {"x": 0, "y": 0},
-                "direction": "NORTH",
-                "gridWidth": 5,
-                "gridHeight": 5,
-                "commands": "FXBLR"
+              "start": {"x": 0, "y": 0},
+              "direction": "NORTH",
+              "gridWidth": 5,
+              "gridHeight": 5,
+              "commands": "FXBLR"
             }
             """;
 
         mockMvc.perform(post("/api/probe/execute")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(jsonRequest))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonRequest))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").value("Invalid command input. Only F, B, L, R are allowed."));
     }
@@ -179,18 +184,17 @@ class ProbeControllerTest {
     void shouldReturnBadRequestForInvalidDirection() throws Exception {
         String json = """
             {
-                "start": {"x": 0, "y": 0},
-                "direction": "UPWARD",
-                "gridWidth": 5,
-                "gridHeight": 5,
-                "commands": "F"
+              "start": {"x": 0, "y": 0},
+              "direction": "UPWARD",
+              "gridWidth": 5,
+              "gridHeight": 5,
+              "commands": "F"
             }
             """;
 
         mockMvc.perform(post("/api/probe/execute")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(json))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
                 .andExpect(status().isBadRequest());
     }
-
 }

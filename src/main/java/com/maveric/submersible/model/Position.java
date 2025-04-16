@@ -1,16 +1,6 @@
 package com.maveric.submersible.model;
 
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
-@AllArgsConstructor
-@Getter
-@EqualsAndHashCode
-@ToString
-public class Position {
-    private int x;
-    private int y;
+public record Position(int x, int y) {
 
     public Position moveForward(Direction direction) {
         return switch (direction) {

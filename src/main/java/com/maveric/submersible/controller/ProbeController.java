@@ -13,16 +13,16 @@ import org.springframework.web.bind.annotation.*;
 public class ProbeController {
 
     @PostMapping("/execute")
-    public ProbeResponse executeCommands(@Valid @RequestBody CommandRequest request) {
+    public ProbeResponse executeCommands(@Valid @RequestBody CommandRequest commandRequest) {
         Probe probe = new Probe(
-                request.getStart(),
-                request.getDirection(),
-                request.getGridWidth(),
-                request.getGridHeight(),
-                request.getObstacles()
+                commandRequest.start(),
+                commandRequest.direction(),
+                commandRequest.gridWidth(),
+                commandRequest.gridHeight(),
+                commandRequest.obstacles()
         );
 
-        probe.execute(request.getCommands());
+        probe.execute(commandRequest.commands());
 
         return new ProbeResponse(
                 probe.getPosition(),
