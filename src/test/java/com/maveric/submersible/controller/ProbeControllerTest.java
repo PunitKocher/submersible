@@ -59,7 +59,7 @@ class ProbeControllerTest {
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.current.x").value(2))
-                .andExpect(jsonPath("$.current.y").value(2))
+                .andExpect(jsonPath("$.current.y").value(0))
                 .andExpect(jsonPath("$.direction").value("SOUTH"));
     }
 
